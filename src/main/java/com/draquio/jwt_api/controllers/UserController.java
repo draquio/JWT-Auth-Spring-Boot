@@ -3,15 +3,23 @@ package com.draquio.jwt_api.controllers;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.draquio.jwt_api.dtos.response.Response;
+import com.draquio.jwt_api.dtos.userDTO.UserCreateDTO;
+import com.draquio.jwt_api.dtos.userDTO.UserDetailDTO;
 import com.draquio.jwt_api.models.User;
 import com.draquio.jwt_api.services.interfaces.IUserService;
+
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 @RestController
@@ -24,12 +32,30 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<User>> GetAllUsersPaged(
-            @RequestParam(defaultValue = "1") int page,
+    public ResponseEntity<Response<Page<User>>> GetAllUsersPaged(
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize){
+
+        var response = new Response<Page<User>>();
+
         Pageable pageable = PageRequest.of(page, pageSize);
-        Page<User> users = userService.GetAllUsersPaged(pageable);
-        return ResponseEntity.ok(users);
+        Page<User> users = userService.getAllUsersPaged(pageable);
+
+        response.setStatus(true);
+        response.setMsg("Paged User list");
+        response.setValue(users);
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping
+    public ResponseEntity<Response<UserDetailDTO>> Create(@RequestBody UserCreateDTO userCreateDTO){
+
+        UserDetailDTO userDetailDTO = userService.create(userCreateDTO);
+        var response = new Response<UserDetailDTO>();
+        response.setStatus(true);
+        response.setValue(userDetailDTO);
+        response.setMsg("User created successfully");
+        return ResponseEntity.ok(response);
     }
     
 
